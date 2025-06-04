@@ -223,3 +223,76 @@ elif command_type == 'UPLOAD':
     encoded_content = parts[2].strip()
     # ... bentuk command_body dan kirim ...
 ```
+
+## ✨ server_thread_pool_http.py
+<p align="justify">File server_thread_pool_http.py menjalankan server HTTP menggunakan Thread Pool untuk menangani klien secara bersamaan. Modifikasi utamanya adalah pada fungsi ProcessTheClient, yang kini lebih andal dalam menerima data. Fungsi ini secara iteratif membaca byte dari socket hingga header HTTP lengkap (b"\r\n\r\n") terdeteksi, memastikan seluruh permintaan klien diterima sebelum diproses oleh httpserver.proses(). Peningkatan logging dengan logging.basicConfig dan penanganan error yang lebih luas (termasuk pencetakan traceback penuh) juga diterapkan untuk debugging yang lebih baik, serta memastikan koneksi klien selalu ditutup dengan benar.</p>
+
+``` py
+def ProcessTheClient(connection,address):
+    # ...
+    rcv_bytes = b""
+    while True: # Baca data sampai header lengkap atau koneksi ditutup
+        data = connection.recv(2048)
+        if data:
+            rcv_bytes += data
+            if b"\r\n\r\n" in rcv_bytes:
+                break
+        else:
+            break
+    # ... validasi rcv_bytes, lalu panggil httpserver.proses(rcv_bytes) ...
+    # ... penanganan error dan penutupan koneksi di blok finally ...
+```
+
+<p align="justify">Fungsi utama Server() juga disesuaikan untuk menggunakan ThreadPoolExecutor, secara efisien menyerahkan setiap koneksi klien yang diterima ke thread yang tersedia di pool. Konfigurasi ini memungkinkan server menangani banyak klien secara bersamaan tanpa overhead pembuatan thread baru untuk setiap permintaan. Server juga kini memiliki penanganan yang bersih untuk interupsi dari pengguna (KeyboardInterrupt), memungkinkan penutupan server yang rapi saat Ctrl+C ditekan</p>
+
+``` py
+def Server():
+    # ... inisialisasi socket dan bind ke port 8885 ...
+    with ThreadPoolExecutor(20) as executor: # Penggunaan ThreadPoolExecutor
+        while True:
+            try:
+                connection, client_address = my_socket.accept()
+                executor.submit(ProcessTheClient, connection, client_address) # Serahkan ke thread pool
+            except KeyboardInterrupt: # Tangani Ctrl+C
+                break
+            # ... penanganan error accept lainnya ...
+```
+
+## ✨ server_process_pool_http.py
+<p align="justify">File server_process_pool_http.py menjalankan HTTP server menggunakan Process Pool untuk menangani klien secara bersamaan. Modifikasi utamanya berfokus pada peningkatan robustnes penerimaan data dari klien dan logging yang lebih informatif. Sebuah konfigurasi logging.basicConfig ditambahkan di awal file untuk mengontrol level dan format pesan log. Ini membantu dalam debugging dan pemantauan aktivitas server.</p>
+
+``` py
+logging.basicConfig(level=logging.WARNING, format='%(asctime)s - %(levelname)s - %(message)s')
+
+def ProcessTheClient(connection,address):
+    # ...
+    rcv_bytes = b""
+    while True: # Baca data hingga header HTTP lengkap atau koneksi ditutup
+        data = connection.recv(2048)
+        if data:
+            rcv_bytes += data
+            if b"\r\n\r\n" in rcv_bytes:
+                break
+        else:
+            break
+    
+    # ... validasi rcv_bytes, lalu panggil httpserver.proses(rcv_bytes) ...
+    # ... penanganan error dan penutupan koneksi di blok finally ...
+```
+
+<p align="justify">Fungsi ProcessTheClient kini lebih canggih dalam menerima data, secara iteratif membaca byte dari socket hingga header HTTP lengkap (b"\r\n\r\n") terdeteksi. Ini memastikan server menerima seluruh permintaan sebelum menyerahkannya ke httpserver.proses(). Penanganan error juga ditingkatkan dengan blok try-except yang lebih luas dan logging.error(exc_info=True) untuk mencetak traceback penuh jika terjadi pengecualian, serta memastikan socket klien selalu ditutup dengan benar di blok finally. Fungsi utama Server() menggunakan ProcessPoolExecutor dengan 20 proses, secara efisien menyerahkan setiap koneksi klien yang diterima ke proses yang tersedia di pool, dan memiliki penanganan yang bersih untuk interupsi pengguna (KeyboardInterrupt).</p>
+
+``` py
+def Server():
+    # ... inisialisasi socket dan bind ke port 8889 ...
+    my_socket.bind(('0.0.0.0', 8889)) # Port spesifik untuk process pool
+    # ...
+    with ProcessPoolExecutor(20) as executor: # Penggunaan ProcessPoolExecutor
+        while True:
+            try:
+                connection, client_address = my_socket.accept()
+                executor.submit(ProcessTheClient, connection, client_address) # Serahkan ke process pool
+            except KeyboardInterrupt: # Tangani Ctrl+C
+                break
+            # ... penanganan error accept lainnya ...
+```
