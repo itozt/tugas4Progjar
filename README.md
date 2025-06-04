@@ -143,3 +143,83 @@ Karena kita menjalankan dengan 2 mode (thread pool dan process pool), maka ada 2
    ![ProcessPool_DELETE](https://github.com/user-attachments/assets/35d63dba-520d-495c-935a-2468825af2a1)<br>
    **Penjelasan :** <br>
    <p align="justify">Pada percobaan ini, client berhasil melakukan operasi DELETE pada server yang berjalan dalam mode Process Pool. Ketika client di Mesin 2 mengirim perintah DELETE nama.txt, client membuat permintaan HTTP POST yang valid. Permintaan ini menyertakan nama.txt sebagai nama file yang akan dihapus di bagian body, dengan total panjang data 113 byte. Server di Mesin 1, yang mendengarkan pada port 8889 menggunakan process pool, menerima dan memproses permintaan DELETE tersebut. Sebuah proses dari pool menangani permintaan, berhasil menghapus file nama.txt dari direktori server. Sebagai konfirmasi, server mengirimkan respons HTTP 200 OK dengan pesan "DELETE SUCCESS" kembali ke client, yang kemudian ditampilkan di terminal client.</p>
+
+# Penjelasan Program yang Dimodifikasi
+## ✨ http.py
+<p align="justify">File http.py berfungsi sebagai inti server, menangani pemrosesan permintaan dan pembuatan respons. Perubahan utama meliputi penambahan fungsionalitas LIST, UPLOAD, dan DELETE sebagai perintah kustom yang dikirim melalui permintaan HTTP POST. Untuk mendukung ini, modul os dan base64 diimpor, dan metode proses diadaptasi untuk menerima raw bytes dari socket. Ini mengatasi masalah TypeError sebelumnya. Metode proses kini secara spesifik mengidentifikasi permintaan POST ke path /command, kemudian mendekode body permintaan tersebut dan meneruskannya ke metode handle_custom_command yang baru. Selain itu, penanganan permintaan GET untuk file statis ditingkatkan dengan validasi keberadaan file dan penentuan tipe konten yang lebih akurat.</p>
+
+``` py
+def proses(self, raw_data_bytes):
+    # ...
+    headers_part_str = raw_data_bytes[:header_end_index].decode('latin-1')
+    body_bytes = raw_data_bytes[header_end_index + 4:] 
+    # ...
+    if (method == 'POST'):
+        if object_address == '/command':
+            try:
+                body_string = body_bytes.decode('utf-8') 
+                return self.handle_custom_command(body_string)
+            except UnicodeDecodeError:
+                return self.response(400, 'Bad Request', 'Invalid body encoding for custom command.'.encode('utf-8'))
+        # ...
+```
+<p align="justify">Fungsionalitas inti LIST, UPLOAD, dan DELETE diimplementasikan dalam metode handle_custom_command yang baru. Perintah LIST menggunakan os.listdir untuk menampilkan file. Perintah UPLOAD memisahkan nama file dan konten Base64 dari body permintaan, mendekode konten Base64, dan menulisnya ke file di server. Perintah DELETE menghapus file berdasarkan nama yang diberikan. Setiap operasi ini juga dilengkapi dengan validasi dasar untuk nama file demi keamanan, serta memberikan respons HTTP yang spesifik (misalnya, 200 OK, 400 Bad Request, 404 Not Found, atau 500 Internal Server Error) kembali ke client.</p>
+
+``` py
+def handle_custom_command(self, command_string):
+    command_string = command_string.strip()
+    thedir = './' 
+
+    if command_string.upper() == 'LIST':
+        # ... logika LIST ...
+    elif command_string.upper().startswith('UPLOAD '):
+        parts = command_string.split(' ', 2)
+        if len(parts) < 3: # Validasi format UPLOAD
+            return self.response(400, 'Bad Request', 'UPLOAD command format: UPLOAD [filename] [base64_content]'.encode('utf-8'), {'Content-type': 'text/plain'})
+        filename = parts[1].strip()
+        base64_content = parts[2].strip()
+        # ... logika dekode dan simpan file ...
+    elif command_string.upper().startswith('DELETE '):
+        parts = command_string.split(' ', 1)
+        if len(parts) < 2: # Validasi format DELETE
+            return self.response(400, 'Bad Request', 'DELETE command format: DELETE [filename]'.encode('utf-8'), {'Content-type': 'text/plain'})
+        filename = parts[1].strip()
+        # ... logika hapus file ...
+    else:
+        return self.response(400, 'Bad Request', 'Unknown custom command.'.encode('utf-8'), {'Content-type': 'text/plain'})
+```
+
+## ✨ client.py
+<p align="justify">File client.py kini berfungsi sebagai antarmuka interaktif yang ditingkatkan untuk berkomunikasi dengan server HTTP. Penyesuaian utama meliputi konfigurasi SERVER_IP dan SERVER_PORT yang jelas di awal file untuk kemudahan penyesuaian alamat server. Selain itu, logging dikonfigurasi ke level ERROR untuk menyembunyikan pesan WARNING yang tidak perlu, menghasilkan output terminal yang lebih bersih.</p>
+
+``` py
+# Konfigurasi Server Tujuan
+SERVER_IP = '172.16.16.101' 
+SERVER_PORT = 8885 # Sesuaikan port 8885 untuk Thread Pool, 8889 untuk Process Pool
+
+# Konfigurasi Logging
+logging.basicConfig(level=logging.ERROR, format='%(levelname)s:%(message)s')
+```
+
+<p align="justify">Fungsi send_command telah diperkuat untuk membaca respons HTTP dengan lebih andal. Ia kini secara aktif mem-parsing header untuk menemukan Content-Length, memastikan seluruh body respons diterima sebelum melanjutkan, dan menggunakan timeout untuk mencegah program macet. Client juga dilengkapi dengan loop interaktif yang memungkinkan pengguna mengetikkan perintah LIST, UPLOAD, atau DELETE. Logika UPLOAD telah diperbaiki agar pengguna dapat memasukkan nama file tujuan di server dan konten Base64 secara langsung, tanpa ketergantungan pada file lokal.</p>
+
+``` py
+def send_command(command_data_bytes):
+    # ...
+    sock.settimeout(10.0)
+    # Fase 1: Baca header sampai '\r\n\r\n'
+    # ...
+    # Fase 2: Baca body berdasarkan Content-Length
+    content_length_match = re.search(r'Content-Length:\s*(\d+)', headers_part, re.IGNORECASE)
+    if content_length_match:
+        # ... logika baca body ...
+    # ...
+
+elif command_type == 'UPLOAD':
+    parts = user_input.split(' ', 2) # Pisahkan 3 bagian
+    if len(parts) < 3: # Validasi format
+        # ... pesan error ...
+    server_filename = parts[1].strip()
+    encoded_content = parts[2].strip()
+    # ... bentuk command_body dan kirim ...
+```
