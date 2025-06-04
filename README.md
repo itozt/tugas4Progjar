@@ -1,6 +1,6 @@
 # Tugas 4 - Pemrograman Jaringan - HTTP Server
 
-# Langkah - Langkah Pengerjaan
+# 🌳 Langkah - Langkah Pengerjaan
 1. Buka Mesin 1 sebagai Server dan Mesin 2 sebagai Client. <br>
    Gunakan command di browser :
    ``` py
@@ -90,3 +90,25 @@ Karena kita menjalankan dengan 2 mode (thread pool dan process pool), maka ada 2
    - Ketik **'DELETE [nama_file_di_server]'** untuk menghapus file.
    - Ketik **'EXIT'** untuk keluar.
 6. Cek output respon yang dihasilkan pada mesin 1 (server), dan cek output yang diterima pada mesin 2 (client).
+
+# 🌳 Hasil dan Pembahasan Thread Pool
+### 1️⃣ LIST
+   **Screenshoot :** <br>
+   ![ThreadPool_LIST](https://github.com/user-attachments/assets/4d51ae31-3335-4c47-b68b-fdd91a6f9625) <br>
+   **Penjelasan :** <br>
+   <p align="justify">Percobaan yang telah dilakukan menunjukkan sistem client-server berfungsi dengan sangat baik dan sesuai harapan. Saat server di Mesin 1 dijalankan dan client di Mesin 2 memulai komunikasi dengan perintah LIST, client berhasil membuat koneksi TCP ke server di 172.16.16.101 pada port 8885. Client kemudian membangun sebuah permintaan HTTP POST yang valid, dengan body berisi perintah LIST, lalu mengirimkannya ke server. Di sisi server, log menunjukkan koneksi diterima dengan sukses dari client. Server lalu mengalokasikan sebuah thread dari thread pool untuk menangani permintaan tersebut. Permintaan LIST diterima dan diurai sepenuhnya oleh server.</p>
+   <p align="justify">Setelah itu, server memproses perintah LIST, mengambil daftar file yang ada di direktorinya, dan membangun respons HTTP 200 OK yang berisi daftar file tersebut di bagian body-nya. Respons ini kemudian dikirim kembali ke client, dan server menutup koneksi. Di sisi client, respons HTTP dari server berhasil diterima. Client secara otomatis memisahkan header dari body respons, lalu mencetak body yang berisi daftar nama-nama file. Inilah mengapa deretan nama file seperti http.py, server_process_pool_http.py, dan lainnya muncul di terminal client. Seluruh proses komunikasi dari pengiriman perintah hingga penerimaan dan tampilan hasil berjalan dengan lancar, menegaskan bahwa implementasi fungsionalitas LIST telah berhasil divalidasi dengan baik pada server mode Thread Pool.</p>
+
+### 2️⃣ UPLOAD
+   **Screenshoot :** <br>
+   ![ThreadPool_UPLOAD](https://github.com/user-attachments/assets/28edc742-f229-48c6-a42d-0e572cf90253) <br>
+   **Penjelasan :** <br>
+   <p align="justify">Pada percobaan ini, client berhasil melakukan operasi UPLOAD pada server Thread Pool. Saat client di Mesin 2 mengirim perintah `UPLOAD perkenalan.txt aGFsbyBuYW1hIHNheWEgSVRP`, client membangun permintaan HTTP POST yang valid. Permintaan ini menyertakan perkenalan.txt sebagai nama file dan aGFsbyBuYW1hIHNheWEgSVRP (konten Base64 dari "Halo nama saya ITO") sebagai isi file di body permintaan, dengan total panjang data 144 byte.</p>
+   <p align="justify">Server di Mesin 1, yang beroperasi dalam mode Thread Pool, menerima koneksi dan permintaan UPLOAD tersebut. Sebuah thread dari pool memproses permintaan, mendekode konten Base64, dan menyimpan file `perkenalan.txt` di direktori server. Setelah berhasil mengunggah file, server mengirimkan respons HTTP 200 OK kembali ke client dengan pesan "UPLOAD success" di body respons, berukuran 152 byte. Client kemudian menerima respons ini dan menampilkan pesan sukses tersebut di terminalnya.</p>
+
+### 3️⃣ DELETE
+   **Screenshoot :** <br>
+   ![ThreadPool_DELETE](https://github.com/user-attachments/assets/35a31eed-9f50-4b93-b84d-84d590a7b771) <br>
+   **Penjelasan :** <br>
+   <p align="justify">Dalam percobaan ini, client berhasil melakukan operasi DELETE pada server Thread Pool. Saat client di Mesin 2 mengirim perintah `DELETE perkenalan.txt`, ia membuat permintaan HTTP POST yang valid. Permintaan ini menyertakan perkenalan.txt sebagai nama file yang akan dihapus di body permintaan, dengan total panjang data 119 byte.</p>
+   <p align="justify">Server di Mesin 1, yang beroperasi dalam mode Thread Pool, menerima koneksi dan permintaan DELETE tersebut. Sebuah thread dari pool memproses permintaan, menemukan file perkenalan.txt, dan menghapusnya dari direktori server. Setelah berhasil menghapus file, server mengirimkan respons HTTP 200 OK kembali ke client dengan pesan "`DELETE SUCCESS`" di body respons, berukuran 152 byte. Client kemudian menerima respons ini dan menampilkan pesan sukses tersebut di terminalnya.</p>
