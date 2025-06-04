@@ -112,3 +112,22 @@ Karena kita menjalankan dengan 2 mode (thread pool dan process pool), maka ada 2
    **Penjelasan :** <br>
    <p align="justify">Dalam percobaan ini, client berhasil melakukan operasi DELETE pada server Thread Pool. Saat client di Mesin 2 mengirim perintah `DELETE perkenalan.txt`, ia membuat permintaan HTTP POST yang valid. Permintaan ini menyertakan perkenalan.txt sebagai nama file yang akan dihapus di body permintaan, dengan total panjang data 119 byte.</p>
    <p align="justify">Server di Mesin 1, yang beroperasi dalam mode Thread Pool, menerima koneksi dan permintaan DELETE tersebut. Sebuah thread dari pool memproses permintaan, menemukan file perkenalan.txt, dan menghapusnya dari direktori server. Setelah berhasil menghapus file, server mengirimkan respons HTTP 200 OK kembali ke client dengan pesan "`DELETE SUCCESS`" di body respons, berukuran 152 byte. Client kemudian menerima respons ini dan menampilkan pesan sukses tersebut di terminalnya.</p>
+
+# 🌳 Hasil dan Pembahasan Process Pool
+### 1️⃣ LIST
+**Screenshoot :** <br>
+![ProcessPool_LIST](https://github.com/user-attachments/assets/49e22978-50ce-42bf-a64a-35b5898423fa)<br>
+**Penjelasan :** <br>
+   <p align="justify">Dalam percobaan ini, client berhasil menguji fungsionalitas LIST pada server yang berjalan dalam mode Process Pool. Saat client di Mesin 2 mengirim perintah LIST, ia membuat permintaan HTTP POST yang valid ke server di 172.16.16.101 pada port 8889. Server menerima permintaan ini, dan sebuah proses dari process pool ditugaskan untuk memprosesnya. Server berhasil membaca seluruh permintaan (101 byte), memproses perintah LIST, dan mengirimkan respons HTTP 200 OK yang berisi daftar file sebagai body (panjang 447 byte) kembali ke client. Client kemudian menerima, mem-parsing, dan menampilkan daftar file tersebut di terminalnya, menegaskan bahwa operasi LIST berfungsi dengan benar pada server mode Process Pool.</p>
+
+### 2️⃣ UPLOAD
+   **Screenshoot :** <br>
+   ![ProcessPool_UPLOAD](https://github.com/user-attachments/assets/d90f78c2-ac75-4e34-ac88-3be093353925)<br>
+   **Penjelasan :** <br>
+   <p align="justify">Dalam percobaan ini, client berhasil mengunggah file ke server yang beroperasi dalam mode Process Pool. Saat client di Mesin 2 mengirim perintah UPLOAD nama.txt Q2hyaXN0b2ZvcnVzIEluZHJh, client membuat permintaan HTTP POST yang valid. Permintaan ini berisi nama file nama.txt dan konten Base64 Q2hyaXN0b2ZvcnVzIEluZHJh di bagian body, dengan total panjang data 138 byte. Server di Mesin 1, yang mendengarkan pada port 8889 menggunakan process pool, menerima dan memproses permintaan UPLOAD tersebut. Sebuah proses dari pool menangani permintaan, mendekode konten Base64, dan berhasil menyimpan file nama.txt di direktori server. Sebagai konfirmasi, server mengirimkan respons HTTP 200 OK dengan pesan "UPLOAD success" kembali ke client, yang kemudian ditampilkan di terminal client.</p>
+
+### 3️⃣ DELETE
+   **Screenshoot :** <br>
+   ![ProcessPool_DELETE](https://github.com/user-attachments/assets/35d63dba-520d-495c-935a-2468825af2a1)<br>
+   **Penjelasan :** <br>
+   <p align="justify">Pada percobaan ini, client berhasil melakukan operasi DELETE pada server yang berjalan dalam mode Process Pool. Ketika client di Mesin 2 mengirim perintah DELETE nama.txt, client membuat permintaan HTTP POST yang valid. Permintaan ini menyertakan nama.txt sebagai nama file yang akan dihapus di bagian body, dengan total panjang data 113 byte. Server di Mesin 1, yang mendengarkan pada port 8889 menggunakan process pool, menerima dan memproses permintaan DELETE tersebut. Sebuah proses dari pool menangani permintaan, berhasil menghapus file nama.txt dari direktori server. Sebagai konfirmasi, server mengirimkan respons HTTP 200 OK dengan pesan "DELETE SUCCESS" kembali ke client, yang kemudian ditampilkan di terminal client.</p>
