@@ -1,5 +1,17 @@
 # Tugas 4 - Pemrograman Jaringan - HTTP Server
-
+# Daftar Isi
+- Langkah - Langkah Pengerjaan
+  - [Thread Pool](https://github.com/itozt/tugas4Progjar/tree/main#-thread-pool)
+  - [Process Pool](https://github.com/itozt/tugas4Progjar/tree/main#%EF%B8%8F-process-pool)
+- Hasil dan Pembahasan
+  - [Thread Pool](https://github.com/itozt/tugas4Progjar/tree/main#-hasil-dan-pembahasan-thread-pool)
+  - [Process Pool](https://github.com/itozt/tugas4Progjar/tree/main#-hasil-dan-pembahasan-process-pool)
+- Penjelasan Program yang Dimodifikasi
+  - [http.py]()
+  - [client.py]()
+  - [server_thread_pool_http.py]()
+  - [server_process_pool_http.py]()
+    
 # 🌳 Langkah - Langkah Pengerjaan
 1. Buka Mesin 1 sebagai Server dan Mesin 2 sebagai Client. <br>
    Gunakan command di browser :
