@@ -7,10 +7,10 @@
   - [Thread Pool](https://github.com/itozt/tugas4Progjar/tree/main#-hasil-dan-pembahasan-thread-pool)
   - [Process Pool](https://github.com/itozt/tugas4Progjar/tree/main#-hasil-dan-pembahasan-process-pool)
 - Penjelasan Program yang Dimodifikasi
-  - [http.py]()
-  - [client.py]()
-  - [server_thread_pool_http.py]()
-  - [server_process_pool_http.py]()
+  - [http.py](https://github.com/itozt/tugas4Progjar/tree/main#-httppy)
+  - [client.py](https://github.com/itozt/tugas4Progjar/tree/main#-clientpy)
+  - [server_thread_pool_http.py](https://github.com/itozt/tugas4Progjar/tree/main#-server_thread_pool_httppy)
+  - [server_process_pool_http.py](https://github.com/itozt/tugas4Progjar/tree/main#-server_process_pool_httppy)
     
 # 🌳 Langkah - Langkah Pengerjaan
 1. Buka Mesin 1 sebagai Server dan Mesin 2 sebagai Client. <br>
