@@ -9,14 +9,12 @@ from http import HttpServer
 
 httpserver = HttpServer()
 
-# Pastikan logging diaktifkan untuk WARNING atau INFO
 logging.basicConfig(level=logging.WARNING, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def ProcessTheClient(connection,address):
     logging.warning(f"Handler for client {address} started.")
     rcv_bytes = b"" # Gunakan bytes untuk menerima data
     try:
-        # Baca data secara bertahap
         while True:
             data = connection.recv(2048) # Baca 2KB sekaligus
             if data:
