@@ -21,7 +21,7 @@
    Gunakan command di browser :
    ``` py
    http://127.0.0.1:60001 # untuk mesin 1
-   http://127.0.0.1:60001 # untuk mesin 2
+   http://127.0.0.1:60002 # untuk mesin 2
    ```
 2. Pada mesin 2 (client), instal perintah requests dengan command :
    ``` bash
